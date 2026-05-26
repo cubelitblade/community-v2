@@ -98,6 +98,9 @@ linters:
             - "gorm.io/driver/postgres"
             - "go.uber.org/fx"
             - "gorm.io/cli/gorm/field"
+            - "github.com/openfga/go-sdk"
+            - "github.com/openfga/go-sdk/client"
+            - "github.com/rabbitmq/amqp091-go"
 
     ignoreSigs:
       - .Errorf(

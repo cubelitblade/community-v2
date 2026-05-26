@@ -10,6 +10,7 @@ import (
 
 	"github.com/caarlos0/env"
 	"github.com/cubelitblade/community-v2/backend/pkg/common/jwt"
+	pkgEvents "github.com/cubelitblade/community-v2/backend/pkg/events"
 	platformconfig "github.com/cubelitblade/community-v2/backend/pkg/platform/config"
 	authTransport "github.com/cubelitblade/community-v2/backend/services/account/internal/auth/transport"
 	"github.com/gin-gonic/gin"
@@ -45,6 +46,7 @@ type Config struct {
 	Snowflake  *platformconfig.SnowflakeConfig
 	JWT        *jwt.Config
 	AuthCookie *authTransport.CookieConfig
+	RabbitMQ   *pkgEvents.Config
 }
 
 // ConfigOut provides all config sub-structs as separate fx dependencies.
@@ -59,6 +61,7 @@ type ConfigOut struct {
 	Snowflake  *platformconfig.SnowflakeConfig
 	JWT        *jwt.Config
 	AuthCookie *authTransport.CookieConfig
+	RabbitMQ   *pkgEvents.Config
 }
 
 // RawConfig is the flat env-var representation parsed by caarlos0/env.
@@ -72,6 +75,7 @@ type RawConfig struct {
 	AccessTokenTTL        time.Duration `env:"ACCESS_TOKEN_TTL" envDefault:"2h"`
 	CookieSameSite        string        `env:"COOKIE_SAME_SITE" envDefault:"lax"`
 	CookieSecure          bool          `env:"COOKIE_SECURE" envDefault:"false"`
+	RabbitMQURL           string        `env:"RABBITMQ_URL" required:"true"`
 }
 
 // LoadConfig reads environment variables and returns a validated Config.
@@ -101,6 +105,7 @@ func LoadConfig() (*Config, error) {
 		Snowflake:  raw.newSnowflakeConfig(),
 		JWT:        jwtCfg,
 		AuthCookie: cookieCfg,
+		RabbitMQ:   raw.newRabbitMQConfig(),
 	}, nil
 }
 
@@ -122,6 +127,7 @@ func ProvideConfig() (ConfigOut, error) {
 		Snowflake:  cfg.Snowflake,
 		JWT:        cfg.JWT,
 		AuthCookie: cfg.AuthCookie,
+		RabbitMQ:   cfg.RabbitMQ,
 	}, nil
 }
 
@@ -253,4 +259,14 @@ func (r *RawConfig) newAuthCookieConfig() (*authTransport.CookieConfig, error) {
 		SameSite: sameSite,
 		MaxAge:   int(r.AccessTokenTTL.Seconds()),
 	}, nil
+}
+
+func (r *RawConfig) newRabbitMQConfig() *pkgEvents.Config {
+	return &pkgEvents.Config{
+		URL:          r.RabbitMQURL,
+		ExchangeName: "domain.events",
+		QueueName:    "",
+		ConsumerTag:  "",
+		Bindings:     nil,
+	}
 }

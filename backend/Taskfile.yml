@@ -9,10 +9,15 @@ vars:
       post:
         path: ./services/post
         cmd: ./cmd/post
+      authz:
+        path: ./services/authz
+        cmd: ./cmd/authz
       common:
         path: ./pkg/common
       platform:
         path: ./pkg/platform
+      events:
+        path: ./pkg/events
 
 tasks:
   work:setup:

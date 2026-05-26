@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/cubelitblade/community-v2/backend/pkg/common/idgen"
+	"github.com/cubelitblade/community-v2/backend/pkg/events"
 	"github.com/cubelitblade/community-v2/backend/pkg/platform"
 	"github.com/cubelitblade/community-v2/backend/services/account/internal/account"
 	"github.com/cubelitblade/community-v2/backend/services/account/internal/account/postgres"
@@ -27,6 +28,7 @@ func Module() fx.Option {
 		fx.Provide(NewAuthenticator),
 		fx.Provide(NewAuthenticatorAdapter),
 		fx.Provide(NewLoginRecorder),
+		fx.Provide(NewEventPublisher),
 		fx.Provide(
 			fx.Annotate(NewHandler, fx.As(new(platform.HTTPMounter)), fx.ResultTags(`group:"mounter"`)),
 		),
@@ -35,9 +37,9 @@ func Module() fx.Option {
 
 // NewHandler creates the account HTTP handler with all dependencies wired.
 func NewHandler(
-	reader *postgres.Reader, writer *postgres.Writer, ids idgen.Generator, logger *slog.Logger,
+	reader *postgres.Reader, writer *postgres.Writer, ids idgen.Generator, publisher *events.Publisher, logger *slog.Logger,
 ) *transport.Handler {
-	registrar := account.NewRegistrar(ids, writer, logger)
+	registrar := account.NewRegistrar(ids, writer, publisher, logger)
 	finder := account.NewProfileFinder(reader, logger)
 
 	return transport.NewHandler(transport.Deps{
@@ -85,4 +87,14 @@ func NewLoginRecorder(
 	reader *postgres.Reader, writer *postgres.Writer, logger *slog.Logger,
 ) *account.LoginRecorder {
 	return account.NewLoginRecorder(time.Now, reader, writer, logger)
+}
+
+// NewEventPublisher creates the RabbitMQ event publisher.
+func NewEventPublisher(cfg *events.Config, logger *slog.Logger) (*events.Publisher, error) {
+	publisher, err := events.NewPublisher(cfg, logger)
+	if err != nil {
+		return nil, fmt.Errorf("create event publisher: %w", err)
+	}
+
+	return publisher, nil
 }

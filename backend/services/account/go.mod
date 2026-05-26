@@ -56,3 +56,5 @@ require (
 	google.golang.org/protobuf v1.36.11 // indirect
 	gorm.io/driver/postgres v1.6.0 // indirect
 )
+
+replace github.com/cubelitblade/community-v2/backend/pkg/events => ../../pkg/events

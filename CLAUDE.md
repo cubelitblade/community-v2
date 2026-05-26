@@ -160,6 +160,7 @@ All config via **environment variables**. Use `direnv allow` to auto-load `.env`
 - No integration tests; no test DB fixtures.
 - White-box tests (same package) use `//nolint:testpackage` directive.
 - Stub types implementing third-party interfaces need `//nolint:ireturn` and `//nolint:revive` annotations for SDK method names.
+- Output built binary to the tmp folder to avoid committing.
 
 ## Lint strictness
 
