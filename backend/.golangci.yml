@@ -81,8 +81,33 @@ linters:
     - wsl_v5
   
   exclusions:
-    generated: strict
+    generated: lax
     warn-unused: true
+    presets:
+      - comments
+      - std-error-handling
+      - common-false-positives
+      - legacy
+    rules:
+      - path: ent
+        linters:
+          - gocyclo
+          - errcheck
+          - dupl
+          - gosec
+          - funlen
+          - exhaustruct
+      - path: _test\.go
+        linters:
+          - gocyclo
+          - errcheck
+          - dupl
+          - gosec
+          - funlen
+          - exhaustruct
+      - path-except: _test\.go
+        linters:
+          - forbidigo
   
   settings:
     depguard:
@@ -94,7 +119,6 @@ linters:
           allow:
             - "$gostd"
             - "github.com/cubelitblade/community-v2/backend"
-            - "github.com/caarlos0/env"
             - "github.com/gin-gonic/gin"
             - "github.com/gorilla/csrf"
             - "golang.org/x/crypto/bcrypt"
@@ -112,6 +136,12 @@ linters:
             - "github.com/knadh/koanf/providers/file"
             - "github.com/knadh/koanf/parsers/toml/v2"
             - 'github.com/go-playground/validator/v10'
+            - 'github.com/stretchr/testify/assert'
+            - 'entgo.io/ent'
+            - 'github.com/mattn/go-sqlite3'
+            - 'github.com/jackc/pgx/v5/stdlib'
+            - 'github.com/pressly/goose/v3'
+            - 'github.com/testcontainers/testcontainers-go'
 
     errcheck:
       check-type-assertions: true
@@ -133,6 +163,7 @@ linters:
         - 'gorm.io/gorm.Config'
         - 'net/http.Client'
         - 'net/http.Transport'
+      allow-empty: true
 
     gosec:
       excludes:
@@ -228,7 +259,8 @@ linters:
         - m map[string]int
         - r *http.Request
         - w http.ResponseWriter
-        - c *gin.Context 
+        - c *gin.Context
+        - db *sql.DB 
         - db *gorm.DB
         - tx *gorm.DB
         - tt *testing.T
