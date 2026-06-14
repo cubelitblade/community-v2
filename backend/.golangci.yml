@@ -105,6 +105,7 @@ linters:
           - gosec
           - funlen
           - exhaustruct
+          - varnamelen
       - path-except: _test\.go
         linters:
           - forbidigo
@@ -135,6 +136,7 @@ linters:
             - "github.com/knadh/koanf/v2"
             - "github.com/knadh/koanf/providers/file"
             - "github.com/knadh/koanf/parsers/toml/v2"
+            - "github.com/knadh/koanf/providers/env/v2"
             - 'github.com/go-playground/validator/v10'
             - 'github.com/stretchr/testify/assert'
             - 'entgo.io/ent'

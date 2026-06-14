@@ -40,6 +40,7 @@ func newClient(ctx context.Context, t *testing.T) *ent.Client {
 		postgres.WithPassword("test_password"),
 		postgres.BasicWaitStrategies(),
 	)
+
 	t.Cleanup(func() {
 		testcontainers.CleanupContainer(t, pgContainer)
 	})

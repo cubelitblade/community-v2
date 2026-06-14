@@ -22,6 +22,7 @@ func FuzzCleanString(f *testing.F) {
 			if strings.TrimSpace(orig) != "" {
 				t.Errorf("cleanString returned nil for non-blank input: %q", orig)
 			}
+
 			return
 		}
 

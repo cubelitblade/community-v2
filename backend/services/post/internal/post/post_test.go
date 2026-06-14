@@ -146,6 +146,7 @@ func TestNewPost(t *testing.T) {
 			if tt.wantErr != nil {
 				t.Fatal("NewPost() succeeded unexpectedly")
 			}
+
 			assert.Equal(t, tt.wantID, got.ID())
 			assert.Equal(t, tt.wantAuthorID, got.AuthorID())
 			assert.Equal(t, tt.wantTitle, got.Title())
@@ -271,6 +272,7 @@ func TestPost_Edit(t *testing.T) {
 			if err != nil {
 				t.Fatalf("could not construct receiver type: %v", err)
 			}
+
 			p.Edit(tt.title, tt.content, now)
 
 			assert.Equal(t, postID, p.ID())
