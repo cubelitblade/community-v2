@@ -2,6 +2,7 @@ package bootstrap
 
 import (
 	"context"
+	"fmt"
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/fx"
@@ -17,7 +18,7 @@ func provideAuthzConn(lc fx.Lifecycle) (*grpc.ClientConn, error) {
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("creating client: %w", err)
 	}
 
 	lc.Append(fx.Hook{

@@ -252,6 +252,7 @@ linters:
         - tc
         - id
         - fc
+        - fn
       ignore-decls:
         - c echo.Context
         - t testing.T
@@ -267,11 +268,13 @@ linters:
         - db *sql.DB 
         - db *gorm.DB
         - tx *gorm.DB
+        - tx *ent.Tx
         - tt *testing.T
         - tc TestCase
         - lc fx.Lifecycle
         - err error
         - ok bool
+        - k *koanf.Koanf
 
     sloglint:
       no-global: "all"

@@ -14,7 +14,7 @@ import (
 func provideSlogLogger(cfg shared.SlogConfig) (*slog.Logger, error) {
 	level, err := slogx.ParseLevel(cfg.Level)
 	if err != nil {
-		return nil, fmt.Errorf("parse slog level")
+		return nil, fmt.Errorf("parse log level: %w", err)
 	}
 
 	format, err := slogx.ParseTimeFormat(cfg.Tint.TimeFormat)
@@ -26,7 +26,7 @@ func provideSlogLogger(cfg shared.SlogConfig) (*slog.Logger, error) {
 		Level: level,
 	}, slogx.WithTimeFormat(format))
 	if err != nil {
-		return nil, fmt.Errorf("create handler")
+		return nil, fmt.Errorf("create handler: %w", err)
 	}
 
 	return slog.New(handler), nil

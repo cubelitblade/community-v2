@@ -3,8 +3,9 @@ package bootstrap
 import (
 	"context"
 
-	"github.com/cubelitblade/community-v2/backend/services/post/internal/application"
 	"go.uber.org/fx"
+
+	"github.com/cubelitblade/community-v2/backend/services/post/internal/application"
 )
 
 func NewApp() *fx.App {

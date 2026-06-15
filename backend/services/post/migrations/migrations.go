@@ -1,3 +1,6 @@
+// Package migrations handles database schema migrations for the post service.
+// It embeds SQL migration scripts into the binary and utilizes the goose library
+// to apply them to a PostgreSQL database.
 package migrations
 
 import (

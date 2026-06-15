@@ -26,7 +26,10 @@ func (m *EntTransactor) InTx(ctx context.Context, fn func(context.Context) error
 	}
 	defer func() {
 		if v := recover(); v != nil {
-			tx.Rollback()
+			if rerr := tx.Rollback(); rerr != nil {
+				panic(fmt.Errorf("panic: %v, rollback also failed: %w", v, rerr))
+			}
+
 			panic(v)
 		}
 	}()
@@ -34,11 +37,15 @@ func (m *EntTransactor) InTx(ctx context.Context, fn func(context.Context) error
 	txCtx := ent.NewTxContext(ctx, tx)
 	if err := fn(txCtx); err != nil {
 		if rerr := tx.Rollback(); rerr != nil {
-			return errors.Join(err, rerr)
+			return errors.Join(fmt.Errorf("executing tx: %w", err), fmt.Errorf("rolling back: %w", rerr))
 		}
 
-		return err
+		return fmt.Errorf("executing tx: %w", err)
 	}
 
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("committing tx: %w", err)
+	}
+
+	return nil
 }

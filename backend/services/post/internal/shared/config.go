@@ -1,3 +1,6 @@
+// Package shared contains common types and configurations used across different
+// layers of the post service. Currently, it primarily defines the configuration
+// structures required to bootstrap the application and initialize adapters.
 package shared
 
 import (
@@ -14,7 +17,7 @@ type Config struct {
 	Database  DatabaseConfig  `koanf:"db"`
 	Slog      SlogConfig      `koanf:"slog"`
 	GRPC      GRPCConfig      `koanf:"grpc"`
-	Snowflake SnowflakeConfig `koanf:"snowflake`
+	Snowflake SnowflakeConfig `koanf:"snowflake"`
 }
 
 type GinConfig struct {
@@ -40,5 +43,5 @@ type GRPCConfig struct {
 }
 
 type SnowflakeConfig struct {
-	NodeID int64 `koanf:node_id`
+	NodeID int64 `koanf:"node_id"`
 }

@@ -27,20 +27,24 @@ func LoadConfig() (shared.Config, error) {
 	// Load from environment variables, will override duplicated config.
 	if err := k.Load(env.Provider(".", env.Opt{
 		Prefix: "POST_",
-		TransformFunc: func(k, v string) (string, any) {
-			k = strings.ReplaceAll(strings.ToLower(k), "_", ".")
-			if strings.Contains(v, " ") {
-				return k, strings.Split(v, " ")
+		TransformFunc: func(key, val string) (string, any) {
+			key = strings.ReplaceAll(strings.ToLower(key), "_", ".")
+			if strings.Contains(val, " ") {
+				return key, strings.Split(val, " ")
 			}
 
-			return k, v
+			return key, val
 		},
 	}), nil); err != nil {
 		return shared.Config{}, fmt.Errorf("load config from environment variables: %w", err)
 	}
 
 	var config shared.Config
-	k.Unmarshal("post", &config)
+
+	err := k.Unmarshal("post", &config)
+	if err != nil {
+		return shared.Config{}, fmt.Errorf("unmarshal config: %w", err)
+	}
 
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	if err := validate.Struct(config); err != nil {

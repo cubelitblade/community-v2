@@ -1,3 +1,6 @@
+// Package authz provides a driven adapter for authorization operations.
+// It implements the port.Authorizer interface by interacting with an external
+// authorization service via gRPC to check user permissions.
 package authz
 
 import (
@@ -24,7 +27,8 @@ func (a *Authorizer) CanPublishPost(ctx context.Context, accountID int64) (bool,
 		Object:   contract.ObjectSystemCommunity,
 	})
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("check permission: %w", err)
 	}
+
 	return resp.Allowed, nil
 }
