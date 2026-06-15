@@ -1,11 +1,10 @@
 package bootstrap
 
 import (
-	"log/slog"
+	"context"
 
+	"github.com/cubelitblade/community-v2/backend/services/post/internal/application"
 	"go.uber.org/fx"
-
-	post "github.com/cubelitblade/community-v2/backend/services/post/internal/post/setup"
 )
 
 func NewApp() *fx.App {
@@ -14,11 +13,13 @@ func NewApp() *fx.App {
 
 		DBModule(),
 		SlogModule(),
+		GRPCModule(),
+		SnowflakeModule(),
 
-		post.Module(),
+		PostModule(),
 
-		fx.Invoke(func(logger *slog.Logger) {
-			logger.Info("abc")
+		fx.Invoke(func(p *application.PublishPost) {
+			p.Publish(context.Background(), 1, nil, "content")
 		}),
 	)
 }

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"go.uber.org/fx"
+	"google.golang.org/grpc"
 
 	authz "github.com/cubelitblade/community-v2/backend/services/authz/internal/authz/setup"
 	health "github.com/cubelitblade/community-v2/backend/services/authz/internal/health/setup"
@@ -18,6 +19,7 @@ func NewApp() *fx.App {
 		OpenFGAModule(),
 		GinModule(),
 		HTTPServer(),
+		GRPCModule(),
 
 		authz.Module(),
 		health.Module(),
@@ -25,5 +27,6 @@ func NewApp() *fx.App {
 		fx.Invoke(registerAPIRoutes),
 		fx.Invoke(registerHealthRoutes),
 		fx.Invoke(func(*http.Server) {}),
+		fx.Invoke(func(*grpc.Server) {}),
 	)
 }

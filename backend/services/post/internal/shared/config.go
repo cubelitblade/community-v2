@@ -9,10 +9,12 @@ type AppEnv string
 type Config struct {
 	fx.Out
 
-	Env      AppEnv         `koanf:"env" validate:"required,oneof=dev prod"`
-	Gin      GinConfig      `koanf:"gin"`
-	Database DatabaseConfig `koanf:"db"`
-	Slog     SlogConfig     `koanf:"slog"`
+	Env       AppEnv          `koanf:"env" validate:"required,oneof=dev prod"`
+	Gin       GinConfig       `koanf:"gin"`
+	Database  DatabaseConfig  `koanf:"db"`
+	Slog      SlogConfig      `koanf:"slog"`
+	GRPC      GRPCConfig      `koanf:"grpc"`
+	Snowflake SnowflakeConfig `koanf:"snowflake`
 }
 
 type GinConfig struct {
@@ -31,4 +33,12 @@ type SlogConfig struct {
 
 type SlogTintConfig struct {
 	TimeFormat string `koanf:"time_format"`
+}
+
+type GRPCConfig struct {
+	Reflection bool `koanf:"reflection"`
+}
+
+type SnowflakeConfig struct {
+	NodeID int64 `koanf:node_id`
 }

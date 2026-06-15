@@ -10,18 +10,22 @@ import (
 	"github.com/cubelitblade/community-v2/backend/pkg/events/rabbitmq"
 	"github.com/cubelitblade/community-v2/backend/pkg/platform"
 	"github.com/cubelitblade/community-v2/backend/services/authz/internal/authz"
-	"github.com/cubelitblade/community-v2/backend/services/authz/internal/authz/transport"
+	"github.com/cubelitblade/community-v2/backend/services/authz/internal/authz/transport/grpc"
+	"github.com/cubelitblade/community-v2/backend/services/authz/internal/authz/transport/http"
 )
 
 // Module returns the fx providers for the authz microservice.
 func Module() fx.Option {
 	return fx.Options(
 		fx.Provide(authz.NewWriter),
-		fx.Provide(fx.Annotate(authz.NewChecker, fx.As(new(transport.Checker)))),
+		fx.Provide(fx.Annotate(authz.NewChecker, fx.As(new(http.Checker)), fx.As(new(grpc.Checker)))),
 		fx.Provide(authz.NewHealthChecker),
 		fx.Provide(provideSyncer),
 		fx.Provide(
-			fx.Annotate(transport.NewHandler, fx.As(new(platform.HTTPMounter)), fx.ResultTags(`group:"mounter"`)),
+			fx.Annotate(http.NewHandler, fx.As(new(platform.HTTPMounter)), fx.ResultTags(`group:"mounter"`)),
+		),
+		fx.Provide(
+			fx.Annotate(grpc.NewServer, fx.As(new(platform.GRPCRegistrar)), fx.ResultTags(`group:"grpc_registrar"`)),
 		),
 		fx.Invoke(func(*authz.Syncer) {}),
 	)
