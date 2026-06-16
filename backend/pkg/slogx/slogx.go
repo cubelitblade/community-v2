@@ -3,6 +3,7 @@
 package slogx
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/lmittmann/tint"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var (
@@ -104,4 +106,27 @@ func NewHandler(handlerName string, slogOpts *slog.HandlerOptions, tintOpts ...T
 	default:
 		return nil, fmt.Errorf("%w: %q", errUnsupportedSlogHandler, handlerName)
 	}
+}
+
+type OtelHandler struct {
+	slog.Handler
+}
+
+func NewOtelHandler(next slog.Handler) slog.Handler {
+	return &OtelHandler{
+		Handler: next,
+	}
+}
+
+func (h *OtelHandler) Handle(ctx context.Context, r slog.Record) error {
+	span := trace.SpanFromContext(ctx)
+
+	if span.SpanContext().IsValid() {
+		r.AddAttrs(
+			slog.String("trace_id", span.SpanContext().TraceID().String()),
+			slog.String("span_id", span.SpanContext().SpanID().String()),
+		)
+	}
+
+	return h.Handler.Handle(ctx, r)
 }

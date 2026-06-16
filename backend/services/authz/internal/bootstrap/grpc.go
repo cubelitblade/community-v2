@@ -55,27 +55,6 @@ func provideGRPCServer(lc fx.Lifecycle, p grpcParams, logger *slog.Logger) (*grp
 	return srv, nil
 }
 
-// func NewGRPCServer(p grpcParams) *grpc.Server {
-// 	s := grpc.NewServer()
-
-// 	for _, r := range p.Registrars {
-// 		r.RegisterGRPC(s)
-// 	}
-
-// 	return s
-// }
-
-// func StartGRPC(s *grpc.Server, logger *slog.Logger) {
-// 	lis, err := net.Listen("tcp", ":50051")
-// 	if err != nil {
-// 		logger.Error("failed to listen for gRPC", "error", err)
-// 		return
-// 	}
-
-// 	logger.Info("Starting gRPC server on :50051")
-// 	go s.Serve(lis)
-// }
-
 func GRPCModule() fx.Option {
 	return fx.Options(
 		fx.Provide(provideGRPCServer),

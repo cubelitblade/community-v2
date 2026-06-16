@@ -1,11 +1,8 @@
 package bootstrap
 
 import (
-	"context"
-
 	"go.uber.org/fx"
-
-	"github.com/cubelitblade/community-v2/backend/services/post/internal/application"
+	"google.golang.org/grpc"
 )
 
 func NewApp() *fx.App {
@@ -16,11 +13,10 @@ func NewApp() *fx.App {
 		SlogModule(),
 		GRPCModule(),
 		SnowflakeModule(),
+		TelemetryModule(),
 
 		PostModule(),
 
-		fx.Invoke(func(p *application.PublishPost) {
-			p.Publish(context.Background(), 1, nil, "content")
-		}),
+		fx.Invoke(func(*grpc.Server) {}),
 	)
 }

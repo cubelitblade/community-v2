@@ -5,13 +5,15 @@ import (
 	"database/sql"
 	"fmt"
 
+	semconv "go.opentelemetry.io/otel/semconv/v1.41.0"
 	"go.uber.org/fx"
 
+	"github.com/XSAM/otelsql"
 	"github.com/cubelitblade/community-v2/backend/services/post/internal/shared"
 )
 
 func provideDB(cfg shared.DatabaseConfig) (*sql.DB, error) {
-	db, err := sql.Open("pgx", cfg.URI)
+	db, err := otelsql.Open("pgx", cfg.URI, otelsql.WithAttributes(semconv.DBSystemNamePostgreSQL))
 	if err != nil {
 		return nil, fmt.Errorf("open database: %w", err)
 	}

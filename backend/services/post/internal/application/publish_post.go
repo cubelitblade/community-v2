@@ -35,7 +35,7 @@ func NewPublishPost(
 	}
 }
 
-func (p *PublishPost) Publish(ctx context.Context, accountID int64, title *string, content string) error {
+func (p *PublishPost) Publish(ctx context.Context, accountID int64, title *string, content string) (int64, error) {
 	ok, err := p.authz.CanPublishPost(ctx, accountID)
 	if err != nil {
 		p.logger.ErrorContext(ctx, "failed to check permission", slog.Any("error", err))
@@ -47,7 +47,7 @@ func (p *PublishPost) Publish(ctx context.Context, accountID int64, title *strin
 			slog.String("permission", "can_publish_post"),
 		)
 
-		return domain.ErrPermissionDenied
+		return 0, domain.ErrPermissionDenied
 	}
 
 	p.logger.DebugContext(ctx, "permission check passed", slog.Int64("account_id", accountID))
@@ -55,13 +55,13 @@ func (p *PublishPost) Publish(ctx context.Context, accountID int64, title *strin
 	id, err := p.idgen.Next()
 	if err != nil {
 		p.logger.ErrorContext(ctx, "failed to generate id", slog.Any("error", err))
-		return fmt.Errorf("generate id: %w", err)
+		return 0, fmt.Errorf("generate id: %w", err)
 	}
 
 	post, err := model.NewPost(id, accountID, title, content, p.timeFunc())
 	if err != nil {
 		p.logger.ErrorContext(ctx, "failed to create post", slog.Any("error", err))
-		return fmt.Errorf("create post: %w", err)
+		return 0, fmt.Errorf("create post: %w", err)
 	}
 
 	if err := p.transactor.InTx(ctx, func(ctx context.Context) error {
@@ -74,7 +74,7 @@ func (p *PublishPost) Publish(ctx context.Context, accountID int64, title *strin
 		return nil
 	}); err != nil {
 		p.logger.ErrorContext(ctx, "transaction error", slog.Any("error", err))
-		return fmt.Errorf("tx error: %w", err)
+		return 0, fmt.Errorf("tx error: %w", err)
 	}
 
 	p.logger.InfoContext(ctx, "post published successfully",
@@ -82,5 +82,5 @@ func (p *PublishPost) Publish(ctx context.Context, accountID int64, title *strin
 		slog.Int64("account_id", accountID),
 	)
 
-	return nil
+	return id, nil
 }

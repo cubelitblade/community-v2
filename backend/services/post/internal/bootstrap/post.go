@@ -11,6 +11,7 @@ import (
 	"github.com/cubelitblade/community-v2/backend/services/post/internal/adapter/driven/misc"
 	"github.com/cubelitblade/community-v2/backend/services/post/internal/adapter/driven/persistence"
 	"github.com/cubelitblade/community-v2/backend/services/post/internal/adapter/driven/persistence/ent"
+	"github.com/cubelitblade/community-v2/backend/services/post/internal/adapter/driving/grpc"
 	"github.com/cubelitblade/community-v2/backend/services/post/internal/application"
 )
 
@@ -24,6 +25,8 @@ func PostModule() fx.Option {
 		fx.Provide(authz.NewAuthorizer),
 
 		fx.Provide(misc.NewIDGenerator),
+
+		fx.Provide(grpc.NewPostServiceServer),
 
 		fx.Provide(application.NewPublishPost),
 	)

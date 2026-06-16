@@ -18,6 +18,7 @@ type Config struct {
 	Slog      SlogConfig      `koanf:"slog"`
 	GRPC      GRPCConfig      `koanf:"grpc"`
 	Snowflake SnowflakeConfig `koanf:"snowflake"`
+	OTEL      OTELConfig      `koanf:"otel"`
 }
 
 type GinConfig struct {
@@ -39,9 +40,18 @@ type SlogTintConfig struct {
 }
 
 type GRPCConfig struct {
-	Reflection bool `koanf:"reflection"`
+	Addr       string `koanf:"addr"`
+	Reflection bool   `koanf:"reflection"`
 }
 
 type SnowflakeConfig struct {
 	NodeID int64 `koanf:"node_id"`
+}
+
+type OTELConfig struct {
+	ServiceName     string `koanf:"service_name"`
+	Endpoint        string `koanf:"endpoint"`
+	Insecure        bool   `koanf:"insecure"`
+	Enable          bool   `koanf:"enable"`
+	ConsoleExporter bool   `koanf:"console_exporter"`
 }

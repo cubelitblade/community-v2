@@ -29,7 +29,7 @@ func provideSlogLogger(cfg shared.SlogConfig) (*slog.Logger, error) {
 		return nil, fmt.Errorf("create handler: %w", err)
 	}
 
-	return slog.New(handler), nil
+	return slog.New(slogx.NewOtelHandler(handler)), nil
 }
 
 // SlogModule provides the slog fx module.
