@@ -11,6 +11,8 @@ import (
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
 	postv1 "github.com/cubelitblade/community-v2/backend/gen/go/post/v1"
@@ -90,7 +92,18 @@ func GRPCModule() fx.Option {
 		fx.Provide(postgrpc.NewPostServiceServer),
 
 		fx.Provide(NewGRPCClientConn),
+		fx.Provide(NewHealthServer),
 
+		fx.Invoke(RegisterHealthServer),
 		fx.Invoke(func(*grpc.Server) {}),
 	)
+}
+
+func NewHealthServer() *health.Server {
+	return health.NewServer()
+}
+
+func RegisterHealthServer(grpcSrv *grpc.Server, healthSrv *health.Server) {
+	healthSrv.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
+	grpc_health_v1.RegisterHealthServer(grpcSrv, healthSrv)
 }
