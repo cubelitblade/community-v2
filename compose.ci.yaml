@@ -1,0 +1,102 @@
+services:
+  db:
+    image: docker.io/library/postgres:18-alpine
+    restart: "no"
+    environment:
+      POSTGRES_USER: community
+      POSTGRES_PASSWORD: community_dev_password
+      POSTGRES_DB: community
+      POSTGRES_HOST_AUTH_METHOD: trust
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U community"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: docker.io/library/redis:8.8.0-alpine
+    restart: "no"
+
+  rabbitmq:
+    image: docker.io/library/rabbitmq:4.3-management
+    restart: "no"
+    environment:
+      RABBITMQ_DEFAULT_USER: community
+      RABBITMQ_DEFAULT_PASS: community_dev_password
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  openfga-migrate:
+    image: docker.io/openfga/openfga:latest
+    restart: "no"
+    environment:
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://community:community_dev_password@db:5432/community?sslmode=disable
+    command: migrate
+    depends_on:
+      db:
+        condition: service_healthy
+
+  openfga:
+    image: docker.io/openfga/openfga:latest
+    restart: "no"
+    command: run
+    environment:
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://community:community_dev_password@db:5432/community?sslmode=disable
+      OPENFGA_PLAYGROUND_ENABLED: "false"
+    depends_on:
+      openfga-migrate:
+        condition: service_completed_successfully
+
+  authz:
+    build:
+      context: backend
+      dockerfile: services/authz/Dockerfile
+    restart: "no"
+    environment:
+      AUTHZ_CONFIG_TOML_PATH: /etc/authz/config.toml
+    volumes:
+      - ./backend/services/authz/config.toml:/etc/authz/config.toml:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      openfga:
+        condition: service_started
+
+  post:
+    build:
+      context: backend
+      dockerfile: services/post/Dockerfile
+    restart: "no"
+    environment:
+      POST_CONFIG_TOML_PATH: /etc/post/config.toml
+    volumes:
+      - ./backend/services/post/config.toml:/etc/post/config.toml:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  account:
+    build:
+      context: backend
+      dockerfile: services/account/Dockerfile
+    restart: "no"
+    environment:
+      ACCOUNT_CONFIG_TOML_PATH: /etc/account/config.toml
+    volumes:
+      - ./backend/services/account/config.toml:/etc/account/config.toml:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy

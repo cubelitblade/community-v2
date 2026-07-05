@@ -2,9 +2,12 @@ package bootstrap
 
 import (
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
-	toml "github.com/knadh/koanf/parsers/toml/v2"
+	"github.com/knadh/koanf/parsers/toml/v2"
+	"github.com/knadh/koanf/providers/env/v2"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
 	"go.uber.org/fx"
@@ -17,8 +20,24 @@ import (
 func LoadConfig() (*shared.Config, error) {
 	loader := koanf.New(".")
 
-	if err := loader.Load(file.Provider("services/account/config.toml"), toml.Parser()); err != nil {
-		return nil, fmt.Errorf("loading config: %w", err)
+	if tomlPath := os.Getenv("ACCOUNT_CONFIG_TOML_PATH"); tomlPath != "" {
+		if err := loader.Load(file.Provider(tomlPath), toml.Parser()); err != nil {
+			return nil, fmt.Errorf("load config from toml: %w", err)
+		}
+	}
+
+	if err := loader.Load(env.Provider(".", env.Opt{
+		Prefix: "ACCOUNT_",
+		TransformFunc: func(key, val string) (string, any) {
+			key = strings.ReplaceAll(strings.ToLower(key), "_", ".")
+			if strings.Contains(val, " ") {
+				return key, strings.Split(val, " ")
+			}
+
+			return key, val
+		},
+	}), nil); err != nil {
+		return nil, fmt.Errorf("load config from environment variables: %w", err)
 	}
 
 	var cfg shared.Config
@@ -26,8 +45,8 @@ func LoadConfig() (*shared.Config, error) {
 		return nil, fmt.Errorf("unmarshal config: %w", err)
 	}
 
-	validate := validator.New()
-	if err := validate.Struct(&cfg); err != nil {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	if err := validate.Struct(cfg); err != nil {
 		return nil, fmt.Errorf("validate config: %w", err)
 	}
 
