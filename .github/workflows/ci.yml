@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  push:
+
+env:
+  GOPRIV: github.com/cubelitblade/community-v2
+  GOPROXY: https://proxy.golang.org,direct
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.4"
+          cache: true
+
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | \
+            sh -s -- -b $(go env GOPATH)/bin
+
+      - name: Lint
+        run: |
+          set -e
+          for mod in services/authz services/post services/account \
+                    pkg/common pkg/contracts pkg/events pkg/platform pkg/slogx; do
+            echo "=== Lint: $mod ==="
+            (cd "$mod" && golangci-lint run --config ../../.golangci.yml ./...)
+          done
+        working-directory: backend
+
+      - name: Vet
+        run: |
+          set -e
+          for mod in services/authz services/post services/account \
+                    pkg/common pkg/contracts pkg/events pkg/platform pkg/slogx; do
+            echo "=== Vet: $mod ==="
+            (cd "$mod" && go vet ./...)
+          done
+        working-directory: backend
+
+      - name: Build
+        run: |
+          set -e
+          for mod in services/authz services/post services/account \
+                    pkg/common pkg/contracts pkg/events pkg/platform pkg/slogx \
+                    gen/go; do
+            echo "=== Build: $mod ==="
+            (cd "$mod" && go build ./...)
+          done
+        working-directory: backend
+
+      - name: Unit Tests
+        run: |
+          set -e
+          for mod in services/authz services/post services/account \
+                    pkg/common pkg/contracts pkg/events pkg/platform pkg/slogx \
+                    gen/go; do
+            echo "=== Unit tests: $mod ==="
+            (cd "$mod" && go test -short -race -count=1 ./...)
+          done
+        working-directory: backend
+
+      - name: Integration Tests
+        run: |
+          set -e
+          for mod in services/authz services/post services/account \
+                    pkg/common pkg/contracts pkg/events pkg/platform pkg/slogx \
+                    gen/go; do
+            echo "=== Integration tests: $mod ==="
+            (cd "$mod" && go test -race -count=1 ./...)
+          done
+        working-directory: backend
+
+      - name: Build Service Binaries
+        run: |
+          mkdir -p bin
+          for svc in services/authz services/post services/account; do
+            name=$(basename "$svc")
+            echo "=== Build binary: $name ==="
+            go build -o "bin/$name" "./${svc}/cmd/${name}"
+          done
+        working-directory: backend
+
+      - name: Smoke Tests
+        run: |
+          docker compose -f compose.ci.yaml build
+
+          docker compose -f compose.ci.yaml up -d
+
+          sleep 5
+
+          attempt=0
+          deadline=60
+          while [ $attempt -lt $deadline ]; do
+            if docker compose -f compose.ci.yaml exec -T authz /grpc_health_probe -addr=:50051 && \
+               docker compose -f compose.ci.yaml exec -T post /grpc_health_probe -addr=:50052 && \
+               docker compose -f compose.ci.yaml exec -T account wget -qO- http://localhost:8080/healthz; then
+              echo "All services healthy"
+              break
+            fi
+            attempt=$((attempt + 1))
+            sleep 1
+          done
+          if [ $attempt -ge $deadline ]; then
+            echo "Timeout waiting for services"
+            docker compose -f compose.ci.yaml logs
+            exit 1
+          fi
+
+          docker compose -f compose.ci.yaml down
