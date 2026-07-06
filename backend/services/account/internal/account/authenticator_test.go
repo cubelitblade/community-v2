@@ -3,6 +3,8 @@ package account_test
 import (
 	"context"
 	"errors"
+	"io"
+	"log/slog"
 	"testing"
 	"time"
 
@@ -47,7 +49,7 @@ func newTestAuthenticator(finder account.ByUsernameFinder) *account.Authenticato
 	return account.NewAuthenticator(
 		finder,
 		nil,
-		nil,
+		slog.New(slog.NewTextHandler(io.Discard, nil)),
 		account.WithAuthenticatorClock(stubNow),
 	)
 }
