@@ -1,4 +1,4 @@
-package config
+package model
 
 // AuthenticatedAccount carries the minimal account information needed after a successful authentication.
 type AuthenticatedAccount struct {

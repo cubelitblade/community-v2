@@ -1,5 +1,5 @@
 //nolint:testpackage // White-box domain tests
-package account
+package model
 
 import (
 	"errors"

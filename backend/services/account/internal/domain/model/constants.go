@@ -1,4 +1,4 @@
-package account
+package model
 
 import "golang.org/x/crypto/bcrypt"
 

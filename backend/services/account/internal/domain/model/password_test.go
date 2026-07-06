@@ -1,4 +1,4 @@
-package account_test
+package model_test
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/cubelitblade/community-v2/backend/services/account/internal/account"
+	"github.com/cubelitblade/community-v2/backend/services/account/internal/domain/model"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 )
 
 //nolint:gochecknoglobals // test data requiring runtime initialization
-var tooLongPassword = strings.Repeat(padChar, account.MaxPasswordBytes+1)
+var tooLongPassword = strings.Repeat(padChar, model.MaxPasswordBytes+1)
 
 func TestValidatePassword(t *testing.T) {
 	t.Parallel()
@@ -30,12 +30,12 @@ func TestValidatePassword(t *testing.T) {
 		{
 			name:    "rejects empty password",
 			raw:     emptyPwd,
-			wantErr: account.ErrPasswordEmpty,
+			wantErr: model.ErrPasswordEmpty,
 		},
 		{
 			name:    "rejects password shorter than minimum",
 			raw:     padChar,
-			wantErr: account.ErrPasswordTooShort,
+			wantErr: model.ErrPasswordTooShort,
 		},
 		{
 			name:    "accepts valid password",
@@ -45,7 +45,7 @@ func TestValidatePassword(t *testing.T) {
 		{
 			name:    "rejects password longer than bcrypt byte limit",
 			raw:     tooLongPassword,
-			wantErr: account.ErrPasswordTooLong,
+			wantErr: model.ErrPasswordTooLong,
 		},
 	}
 
@@ -53,7 +53,7 @@ func TestValidatePassword(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			gotErr := account.ValidatePassword(tt.raw)
+			gotErr := model.ValidatePassword(tt.raw)
 			assertPasswordError(t, gotErr, tt.wantErr)
 		})
 	}
@@ -64,7 +64,7 @@ func TestHashPassword(t *testing.T) {
 
 	raw := validPwd
 
-	hash, err := account.HashPassword(raw)
+	hash, err := model.HashPassword(raw)
 	if err != nil {
 		t.Fatalf("HashPassword() failed: %v", err)
 	}
@@ -90,7 +90,7 @@ func TestPasswordHashFromStorage(t *testing.T) {
 	t.Run("accepts valid hash string", func(t *testing.T) {
 		t.Parallel()
 
-		hash, err := account.PasswordHashFromStorage("some-hash")
+		hash, err := model.PasswordHashFromStorage("some-hash")
 		if err != nil {
 			t.Fatalf("PasswordHashFromStorage() failed: %v", err)
 		}
@@ -103,9 +103,9 @@ func TestPasswordHashFromStorage(t *testing.T) {
 	t.Run("rejects empty hash string", func(t *testing.T) {
 		t.Parallel()
 
-		_, err := account.PasswordHashFromStorage("")
-		if !errors.Is(err, account.ErrPasswordHashEmpty) {
-			t.Errorf("error = %v, want %v", err, account.ErrPasswordHashEmpty)
+		_, err := model.PasswordHashFromStorage("")
+		if !errors.Is(err, model.ErrPasswordHashEmpty) {
+			t.Errorf("error = %v, want %v", err, model.ErrPasswordHashEmpty)
 		}
 	})
 }
@@ -113,7 +113,7 @@ func TestPasswordHashFromStorage(t *testing.T) {
 func TestPasswordHashValue(t *testing.T) {
 	t.Parallel()
 
-	hash, err := account.HashPassword(validPwd)
+	hash, err := model.HashPassword(validPwd)
 	if err != nil {
 		t.Fatalf("HashPassword() failed: %v", err)
 	}
@@ -126,7 +126,7 @@ func TestPasswordHashValue(t *testing.T) {
 func TestPasswordHashString(t *testing.T) {
 	t.Parallel()
 
-	hash, err := account.HashPassword(validPwd)
+	hash, err := model.HashPassword(validPwd)
 	if err != nil {
 		t.Fatalf("HashPassword() failed: %v", err)
 	}

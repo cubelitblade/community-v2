@@ -1,17 +1,17 @@
-package account_test
+package model_test
 
 import (
 	"errors"
 	"strings"
 	"testing"
 
-	"github.com/cubelitblade/community-v2/backend/services/account/internal/account"
+	"github.com/cubelitblade/community-v2/backend/services/account/internal/domain/model"
 )
 
 const (
 	fill              string     = "a"
-	testID            account.ID = 1
-	maxArchiveID      account.ID = 9223372036854775807
+	testID            model.ID = 1
+	maxArchiveID      model.ID = 9223372036854775807
 	maxArchivedSuffix            = "#archived_9223372036854775807"
 )
 
@@ -19,21 +19,21 @@ type usernameCase struct {
 	wantErr error
 	name    string
 	value   string
-	want    account.Username
+	want    model.Username
 }
 
 type archiveUsernameCase struct {
 	wantErr  error
 	name     string
-	username account.Username
-	want     account.Username
-	id       account.ID
+	username model.Username
+	want     model.Username
+	id       model.ID
 }
 
 func TestNewUsername(t *testing.T) {
 	t.Parallel()
 
-	runUsernameCases(t, "NewUsername", account.NewUsername, newUsernameCases())
+	runUsernameCases(t, "NewUsername", model.NewUsername, newUsernameCases())
 }
 
 func TestUsernameFromStorage(t *testing.T) {
@@ -42,7 +42,7 @@ func TestUsernameFromStorage(t *testing.T) {
 	runUsernameCases(
 		t,
 		"UsernameFromStorage",
-		account.UsernameFromStorage,
+		model.UsernameFromStorage,
 		usernameFromStorageCases(),
 	)
 }
@@ -54,7 +54,7 @@ func TestArchiveUsername(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
-			got, gotErr := account.ArchiveUsername(
+			got, gotErr := model.ArchiveUsername(
 				testCase.username,
 				testCase.id,
 			)
@@ -73,7 +73,7 @@ func TestArchiveUsername(t *testing.T) {
 func runUsernameCases(
 	t *testing.T,
 	funcName string,
-	factory func(string) (account.Username, error),
+	factory func(string) (model.Username, error),
 	tests []usernameCase,
 ) {
 	t.Helper()
@@ -98,9 +98,9 @@ func runUsernameCases(
 func assertUsernameResult(
 	t *testing.T,
 	funcName string,
-	got account.Username,
+	got model.Username,
 	gotErr error,
-	want account.Username,
+	want model.Username,
 	wantErr error,
 ) {
 	t.Helper()
@@ -133,33 +133,33 @@ func assertUsernameError(t *testing.T, funcName string, gotErr, wantErr error) {
 }
 
 func newUsernameCases() []usernameCase {
-	minUsername := strings.Repeat(fill, account.MinUsernameLength)
-	maxUsername := strings.Repeat(fill, account.MaxUsernameLength)
+	minUsername := strings.Repeat(fill, model.MinUsernameLength)
+	maxUsername := strings.Repeat(fill, model.MaxUsernameLength)
 
 	return []usernameCase{
 		{
 			name:    "accepts minimum length username",
 			value:   minUsername,
-			want:    account.Username(minUsername),
+			want:    model.Username(minUsername),
 			wantErr: nil,
 		},
 		{
 			name:    "accepts maximum length username",
 			value:   maxUsername,
-			want:    account.Username(maxUsername),
+			want:    model.Username(maxUsername),
 			wantErr: nil,
 		},
 		{
 			name:    "rejects username shorter than minimum length",
 			value:   fill,
 			want:    "",
-			wantErr: account.ErrUsernameLength,
+			wantErr: model.ErrUsernameLength,
 		},
 		{
 			name:    "rejects username longer than maximum length",
-			value:   strings.Repeat(fill, account.MaxUsernameLength+1),
+			value:   strings.Repeat(fill, model.MaxUsernameLength+1),
 			want:    "",
-			wantErr: account.ErrUsernameLength,
+			wantErr: model.ErrUsernameLength,
 		},
 		{
 			name:    "trims surrounding spaces",
@@ -171,16 +171,16 @@ func newUsernameCases() []usernameCase {
 			name:    "rejects blank username",
 			value:   "   ",
 			want:    "",
-			wantErr: account.ErrUsernameBlank,
+			wantErr: model.ErrUsernameBlank,
 		},
 	}
 }
 
 func usernameFromStorageCases() []usernameCase {
-	tooLongNormalUsername := strings.Repeat(fill, account.MaxUsernameLength+1)
+	tooLongNormalUsername := strings.Repeat(fill, model.MaxUsernameLength+1)
 	tooLongStoredUsername := strings.Repeat(
 		fill,
-		account.MaxStoredUsernameLength+1,
+		model.MaxStoredUsernameLength+1,
 	)
 
 	return []usernameCase{
@@ -199,29 +199,29 @@ func usernameFromStorageCases() []usernameCase {
 		{
 			name:    "accepts username longer than normal limit",
 			value:   tooLongNormalUsername,
-			want:    account.Username(tooLongNormalUsername),
+			want:    model.Username(tooLongNormalUsername),
 			wantErr: nil,
 		},
 		{
 			name:    "rejects blank stored username",
 			value:   "   ",
 			want:    "",
-			wantErr: account.ErrUsernameBlank,
+			wantErr: model.ErrUsernameBlank,
 		},
 		{
 			name:    "rejects username longer than storage limit",
 			value:   tooLongStoredUsername,
 			want:    "",
-			wantErr: account.ErrUsernameLength,
+			wantErr: model.ErrUsernameLength,
 		},
 	}
 }
 
 func archiveUsernameCases() []archiveUsernameCase {
-	maxUsername := strings.Repeat(fill, account.MaxUsernameLength)
+	maxUsername := strings.Repeat(fill, model.MaxUsernameLength)
 	tooLongStoredUsername := strings.Repeat(
 		fill,
-		account.MaxStoredUsernameLength,
+		model.MaxStoredUsernameLength,
 	)
 
 	return []archiveUsernameCase{
@@ -234,17 +234,17 @@ func archiveUsernameCases() []archiveUsernameCase {
 		},
 		{
 			name:     "keeps archived username within storage limit",
-			username: account.Username(maxUsername),
+			username: model.Username(maxUsername),
 			id:       maxArchiveID,
-			want:     account.Username(maxUsername + maxArchivedSuffix),
+			want:     model.Username(maxUsername + maxArchivedSuffix),
 			wantErr:  nil,
 		},
 		{
 			name:     "rejects archived username longer than storage limit",
-			username: account.Username(tooLongStoredUsername),
+			username: model.Username(tooLongStoredUsername),
 			id:       testID,
 			want:     "",
-			wantErr:  account.ErrUsernameLength,
+			wantErr:  model.ErrUsernameLength,
 		},
 	}
 }
