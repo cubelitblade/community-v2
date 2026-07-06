@@ -12,7 +12,7 @@ import (
 
 	"github.com/cubelitblade/community-v2/backend/pkg/common/httperr"
 	"github.com/cubelitblade/community-v2/backend/pkg/common/jwt"
-	"github.com/cubelitblade/community-v2/backend/services/account/internal/shared"
+	"github.com/cubelitblade/community-v2/backend/services/account/internal/config"
 )
 
 const keyPrincipal = "principal"
@@ -34,7 +34,7 @@ func ParseToken(parser *jwt.Parser, cookieName string, logger *slog.Logger) gin.
 		)
 
 		//nolint:exhaustruct // Empty struct for assigning later.
-		claims := shared.AccessTokenClaims{}
+		claims := config.AccessTokenClaims{}
 
 		token, err := c.Cookie(cookieName)
 		if err != nil {

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/cubelitblade/community-v2/backend/pkg/common/jwt"
-	"github.com/cubelitblade/community-v2/backend/services/account/internal/shared"
+	"github.com/cubelitblade/community-v2/backend/services/account/internal/config"
 )
 
 // ErrInvalidCredentials is returned when login fails due to invalid credentials.
@@ -18,7 +18,7 @@ var ErrInvalidCredentials = errors.New("invalid credentials")
 
 // Authenticator authenticates a user by username and password.
 type Authenticator interface {
-	Authenticate(ctx context.Context, username, password string) (*shared.AuthenticatedAccount, error)
+	Authenticate(ctx context.Context, username, password string) (*config.AuthenticatedAccount, error)
 }
 
 // LoginRecorder records a successful login event.
@@ -67,7 +67,7 @@ func (l *Login) Execute(ctx context.Context, username, password string, ipaddr n
 		return Credentials{}, fmt.Errorf("sign new claims: %w", err)
 	}
 
-	token, err := l.signer.Sign(shared.AccessTokenClaims{
+	token, err := l.signer.Sign(config.AccessTokenClaims{
 		RegisteredClaims: regClaims,
 		Role:             acc.Role,
 	})

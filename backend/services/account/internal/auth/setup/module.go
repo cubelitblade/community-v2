@@ -11,17 +11,17 @@ import (
 	"github.com/cubelitblade/community-v2/backend/pkg/platform"
 	"github.com/cubelitblade/community-v2/backend/services/account/internal/auth"
 	"github.com/cubelitblade/community-v2/backend/services/account/internal/auth/transport"
-	"github.com/cubelitblade/community-v2/backend/services/account/internal/shared"
+	"github.com/cubelitblade/community-v2/backend/services/account/internal/config"
 )
 
 func provideLogin(
-	authenticator auth.Authenticator, signer *jwt.Signer, recorder auth.LoginRecorder, cfg *shared.TokenConfig,
+	authenticator auth.Authenticator, signer *jwt.Signer, recorder auth.LoginRecorder, cfg *config.TokenConfig,
 ) *auth.Login {
 	return auth.NewLogin(authenticator, signer, recorder, cfg.AccessTokenValidity)
 }
 
 func provideHandler(
-	login *auth.Login, logger *slog.Logger, cfg *shared.TokenConfig, policy transport.CookiePolicy,
+	login *auth.Login, logger *slog.Logger, cfg *config.TokenConfig, policy transport.CookiePolicy,
 ) *transport.Handler {
 	return transport.NewHandler(login, logger, cfg.AccessTokenValidity, policy)
 }

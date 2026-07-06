@@ -10,10 +10,10 @@ import (
 	v1 "github.com/cubelitblade/community-v2/backend/pkg/contracts/v1"
 	"github.com/cubelitblade/community-v2/backend/pkg/events/outbox"
 	"github.com/cubelitblade/community-v2/backend/pkg/events/rabbitmq"
-	"github.com/cubelitblade/community-v2/backend/services/account/internal/shared"
+	"github.com/cubelitblade/community-v2/backend/services/account/internal/config"
 )
 
-func provideRabbitMQEnvironment(cfg *shared.RabbitMQConfig, lc fx.Lifecycle) *rmq.Environment {
+func provideRabbitMQEnvironment(cfg *config.RabbitMQConfig, lc fx.Lifecycle) *rmq.Environment {
 	env := rmq.NewEnvironment(cfg.BrokerURL, nil)
 
 	lc.Append(fx.Hook{

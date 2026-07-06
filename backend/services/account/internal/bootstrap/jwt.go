@@ -5,13 +5,13 @@ import (
 
 	"github.com/cubelitblade/community-v2/backend/pkg/common/idgen"
 	"github.com/cubelitblade/community-v2/backend/pkg/common/jwt"
-	"github.com/cubelitblade/community-v2/backend/services/account/internal/shared"
+	"github.com/cubelitblade/community-v2/backend/services/account/internal/config"
 )
 
 // MinJWTKeyLength is the minimum required length in bytes for a JWT signing key.
 const MinJWTKeyLength = 32
 
-func provideJWT(jwtCfg *shared.JWTConfig, tokenCfg *shared.TokenConfig, ids idgen.Generator) (*jwt.Signer, *jwt.Parser) {
+func provideJWT(jwtCfg *config.JWTConfig, tokenCfg *config.TokenConfig, ids idgen.Generator) (*jwt.Signer, *jwt.Parser) {
 	key := []byte(jwtCfg.Secret)
 	if len(key) < MinJWTKeyLength {
 		panic("JWT key must be at least 32 bytes long")

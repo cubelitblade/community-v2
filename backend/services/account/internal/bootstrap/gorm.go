@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm/logger"
 
 	"github.com/cubelitblade/community-v2/backend/pkg/platform"
-	"github.com/cubelitblade/community-v2/backend/services/account/internal/shared"
+	"github.com/cubelitblade/community-v2/backend/services/account/internal/config"
 )
 
 var errUnsupportedGormLogLevel = errors.New("unsupported gorm log level")
@@ -27,7 +27,7 @@ var gormLoggerLevelMap = map[string]logger.LogLevel{
 }
 
 func provideGorm(
-	dbCfg *shared.DatabaseConfig, gormCfg *shared.GormConfig, s *slog.Logger, lc fx.Lifecycle,
+	dbCfg *config.DatabaseConfig, gormCfg *config.GormConfig, s *slog.Logger, lc fx.Lifecycle,
 ) (gormDB *gorm.DB, sqlDB *sql.DB, err error) {
 	g, err := gormConfig(gormCfg, s)
 	if err != nil {
@@ -48,7 +48,7 @@ func provideGorm(
 	return gormDB, sqlDB, nil
 }
 
-func gormConfig(cfg *shared.GormConfig, s *slog.Logger) (*gorm.Config, error) {
+func gormConfig(cfg *config.GormConfig, s *slog.Logger) (*gorm.Config, error) {
 	slogGormLogger, err := gormLogger(cfg, s)
 	if err != nil {
 		return nil, fmt.Errorf("create gorm logger: %w", err)
@@ -62,7 +62,7 @@ func gormConfig(cfg *shared.GormConfig, s *slog.Logger) (*gorm.Config, error) {
 	}, nil
 }
 
-func gormLogger(cfg *shared.GormConfig, slogLogger *slog.Logger) (logger.Interface, error) {
+func gormLogger(cfg *config.GormConfig, slogLogger *slog.Logger) (logger.Interface, error) {
 	level, ok := gormLoggerLevelMap[strings.ToLower(cfg.Logger.Level)]
 	if !ok {
 		return nil, fmt.Errorf("%w: %q", errUnsupportedGormLogLevel, cfg.Logger.Level)

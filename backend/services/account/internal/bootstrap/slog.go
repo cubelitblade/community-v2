@@ -11,7 +11,7 @@ import (
 	"github.com/lmittmann/tint"
 	"go.uber.org/fx"
 
-	"github.com/cubelitblade/community-v2/backend/services/account/internal/shared"
+	"github.com/cubelitblade/community-v2/backend/services/account/internal/config"
 )
 
 var (
@@ -44,7 +44,7 @@ var (
 	}
 )
 
-func slogHandler(cfg *shared.SlogConfig) (slog.Handler, error) {
+func slogHandler(cfg *config.SlogConfig) (slog.Handler, error) {
 	switch strings.ToLower(cfg.Type) {
 	case "default":
 		return slog.Default().Handler(), nil
@@ -81,7 +81,7 @@ func slogHandler(cfg *shared.SlogConfig) (slog.Handler, error) {
 	return nil, fmt.Errorf("%w: %q", errUnsupportedSlogHandler, cfg.Type)
 }
 
-func provideSlogLogger(cfg *shared.SlogConfig) (*slog.Logger, error) {
+func provideSlogLogger(cfg *config.SlogConfig) (*slog.Logger, error) {
 	handler, err := slogHandler(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("build slog handler: %w", err)

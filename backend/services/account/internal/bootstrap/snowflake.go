@@ -6,10 +6,10 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/cubelitblade/community-v2/backend/pkg/common/idgen"
-	"github.com/cubelitblade/community-v2/backend/services/account/internal/shared"
+	"github.com/cubelitblade/community-v2/backend/services/account/internal/config"
 )
 
-func provideSnowflake(cfg *shared.SnowflakeConfig) (*idgen.Snowflake, error) {
+func provideSnowflake(cfg *config.SnowflakeConfig) (*idgen.Snowflake, error) {
 	s, err := idgen.NewSnowflake(cfg.NodeID)
 	if err != nil {
 		return nil, fmt.Errorf("create snowflake: %w", err)

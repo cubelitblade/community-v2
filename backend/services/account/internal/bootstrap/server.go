@@ -12,7 +12,7 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/cubelitblade/community-v2/backend/pkg/common/httperr"
-	"github.com/cubelitblade/community-v2/backend/services/account/internal/shared"
+	"github.com/cubelitblade/community-v2/backend/services/account/internal/config"
 )
 
 const (
@@ -23,7 +23,7 @@ const (
 
 // provideHTTPServer creates an *http.Server, registers lifecycle hooks to
 // start listening on app start and gracefully shut down on app stop.
-func provideHTTPServer(lifecycle fx.Lifecycle, cfg *shared.Config, router *gin.Engine) *http.Server {
+func provideHTTPServer(lifecycle fx.Lifecycle, cfg *config.Config, router *gin.Engine) *http.Server {
 	protection := http.NewCrossOriginProtection()
 	protection.SetDenyHandler(http.HandlerFunc(WriteCrossOriginError))
 	finalHandler := protection.Handler(router)

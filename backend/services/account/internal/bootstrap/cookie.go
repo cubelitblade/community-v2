@@ -9,7 +9,7 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/cubelitblade/community-v2/backend/services/account/internal/auth/transport"
-	"github.com/cubelitblade/community-v2/backend/services/account/internal/shared"
+	"github.com/cubelitblade/community-v2/backend/services/account/internal/config"
 )
 
 var errUnsupportedSamesite = errors.New("unsupported samesite")
@@ -30,7 +30,7 @@ func (p CookiePolicy) SameSite() http.SameSite {
 	return p.sameSite
 }
 
-func provideCookiePolicy(cfg *shared.CookieConfig) (*CookiePolicy, error) {
+func provideCookiePolicy(cfg *config.CookieConfig) (*CookiePolicy, error) {
 	var sameSite http.SameSite
 
 	switch strings.ToLower(cfg.SameSite) {

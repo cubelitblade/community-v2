@@ -8,10 +8,10 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/cubelitblade/community-v2/backend/pkg/platform"
-	"github.com/cubelitblade/community-v2/backend/services/account/internal/shared"
+	"github.com/cubelitblade/community-v2/backend/services/account/internal/config"
 )
 
-func provideGinEngine(cfg *shared.GinConfig) *gin.Engine {
+func provideGinEngine(cfg *config.GinConfig) *gin.Engine {
 	gin.SetMode(strings.ToLower(cfg.Mode))
 
 	handlers := []gin.HandlerFunc{

@@ -10,7 +10,7 @@ import (
 	"github.com/cubelitblade/community-v2/backend/pkg/common/idgen"
 	"github.com/cubelitblade/community-v2/backend/pkg/common/jwt"
 	"github.com/cubelitblade/community-v2/backend/services/account/internal/auth"
-	"github.com/cubelitblade/community-v2/backend/services/account/internal/shared"
+	"github.com/cubelitblade/community-v2/backend/services/account/internal/config"
 )
 
 const (
@@ -37,13 +37,13 @@ func (g *stubIDGen) NextID() (int64, error) {
 var _ idgen.Generator = (*stubIDGen)(nil)
 
 type stubAuthenticator struct {
-	acc *shared.AuthenticatedAccount
+	acc *config.AuthenticatedAccount
 	err error
 }
 
 func (a *stubAuthenticator) Authenticate(
 	_ context.Context, _, _ string,
-) (*shared.AuthenticatedAccount, error) {
+) (*config.AuthenticatedAccount, error) {
 	if a.err != nil {
 		return nil, a.err
 	}
@@ -72,7 +72,7 @@ func TestLogin_Execute(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		authAcc   shared.AuthenticatedAccount
+		authAcc   config.AuthenticatedAccount
 		authErr   error
 		idGenErr  error
 		wantErr   error
@@ -80,7 +80,7 @@ func TestLogin_Execute(t *testing.T) {
 	}{
 		{
 			name:      "success",
-			authAcc:   shared.AuthenticatedAccount{ID: 1, Role: "member"},
+			authAcc:   config.AuthenticatedAccount{ID: 1, Role: "member"},
 			authErr:   nil,
 			idGenErr:  nil,
 			wantErr:   nil,
@@ -88,7 +88,7 @@ func TestLogin_Execute(t *testing.T) {
 		},
 		{
 			name:      "invalid_credentials",
-			authAcc:   shared.AuthenticatedAccount{ID: 0, Role: ""},
+			authAcc:   config.AuthenticatedAccount{ID: 0, Role: ""},
 			authErr:   auth.ErrInvalidCredentials,
 			idGenErr:  nil,
 			wantErr:   auth.ErrInvalidCredentials,
@@ -96,7 +96,7 @@ func TestLogin_Execute(t *testing.T) {
 		},
 		{
 			name:      "unexpected_auth_error",
-			authAcc:   shared.AuthenticatedAccount{ID: 0, Role: ""},
+			authAcc:   config.AuthenticatedAccount{ID: 0, Role: ""},
 			authErr:   errAuthTimeout,
 			idGenErr:  nil,
 			wantErr:   errAuthTimeout,
@@ -104,7 +104,7 @@ func TestLogin_Execute(t *testing.T) {
 		},
 		{
 			name:      "id_generator_error",
-			authAcc:   shared.AuthenticatedAccount{ID: 1, Role: "member"},
+			authAcc:   config.AuthenticatedAccount{ID: 1, Role: "member"},
 			authErr:   nil,
 			idGenErr:  errBrokenIDGen,
 			wantErr:   errBrokenIDGen,
