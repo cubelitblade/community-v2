@@ -103,8 +103,8 @@ jobs:
           attempt=0
           deadline=60
           while [ $attempt -lt $deadline ]; do
-            if docker compose -f compose.ci.yaml exec -T authz /grpc_health_probe -addr=:50051 && \
-               docker compose -f compose.ci.yaml exec -T post /grpc_health_probe -addr=:50052 && \
+            if docker compose -f compose.ci.yaml exec -T authz /usr/bin/grpc_health_probe -addr=:50051 && \
+               docker compose -f compose.ci.yaml exec -T post /usr/bin/grpc_health_probe -addr=:50052 && \
                docker compose -f compose.ci.yaml exec -T account wget -qO- http://localhost:8080/healthz; then
               echo "All services healthy"
               break
