@@ -37,3 +37,15 @@ set -a; source ./services/authz/.env; set +a
 export AUTHZ_CONFIG_TOML_PATH="$(pwd)/services/authz/config.toml"
 mise x -C ./services/authz -- air
 """
+
+[tasks.ci-quick]
+description = "Run fast CI checks locally (lint + vet + build + short tests)"
+run = """
+MODULES="./gen/go/... ./pkg/common/... ./pkg/contracts/... ./pkg/events/... ./pkg/platform/... ./pkg/slogx/... ./services/account/... ./services/authz/... ./services/post/..."
+EXIT=0
+golangci-lint run --config .golangci.yml $MODULES || { echo "[lint] FAILED"; EXIT=1; }
+go vet $MODULES || { echo "[vet] FAILED"; EXIT=1; }
+go build $MODULES || { echo "[build] FAILED"; EXIT=1; }
+go test -short -race -count=1 $MODULES || { echo "[test] FAILED"; EXIT=1; }
+exit $EXIT
+"""
