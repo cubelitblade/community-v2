@@ -1,2 +1,18 @@
-extends:
-  - backend/.lefthook.yml
+pre-commit:
+  commands:
+    lint:
+      glob: "backend/**/*.go"
+      run: golangci-lint run --config backend/.golangci.yml {staged_files}
+      exclude:
+        - "backend/gen/**"
+
+    vet:
+      glob: "backend/**/*.go"
+      run: go vet {staged_files}
+      exclude:
+        - "backend/gen/**"
+
+pre-push:
+  commands:
+    test:
+      run: go test -short -count=1 ./backend/...
